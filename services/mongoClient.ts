@@ -79,19 +79,35 @@ export async function saveSearchSessionToMongo(
   }
 }
 
-// Get all search sessions
-export async function getAllSearchSessionsFromMongo(): Promise<
-  SearchSession[]
-> {
+// Get all search sessions with pagination
+export async function getAllSearchSessionsFromMongo(
+  page: number = 1,
+  limit: number = 5
+): Promise<{
+  sessions: SearchSession[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}> {
   try {
-    const response = await fetch(`${API_BASE_URL}?action=getSessions`);
+    const response = await fetch(
+      `${API_BASE_URL}?action=getSessions&page=${page}&limit=${limit}`
+    );
     const result = await response.json();
 
     if (!result.success) {
       throw new Error(result.error || "Failed to fetch sessions");
     }
 
-    return result.sessions;
+    return {
+      sessions: result.sessions,
+      pagination: result.pagination,
+    };
   } catch (error) {
     console.error("Error fetching sessions from MongoDB:", error);
     throw error;

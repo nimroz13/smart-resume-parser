@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ** FIX: Conditionally choose the correct Gemini endpoint **
     const endpoint = stream ? "streamGenerateContent" : "generateContent";
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:${endpoint}?key=${API_KEY}`;
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:${endpoint}?key=${API_KEY}`;
 
     const geminiResponse = await fetch(GEMINI_API_URL, {
       method: "POST",
@@ -67,10 +67,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   } catch (error: any) {
     console.error("Serverless function error:", error);
-    return res
-      .status(500)
-      .json({
-        error: { message: "Internal Server Error", details: error.message },
-      });
+    return res.status(500).json({
+      error: { message: "Internal Server Error", details: error.message },
+    });
   }
 }

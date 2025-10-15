@@ -100,18 +100,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // Get all sessions
+    // Get all sessions (with pagination)
     if (action === "getSessions" && req.method === "GET") {
       const collection = db.collection("search_sessions");
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 5;
+      const skip = (page - 1) * limit;
+
+      // Get total count for pagination
+      const totalCount = await collection.countDocuments();
+
+      // Get paginated sessions
       const sessions = await collection
         .find()
         .sort({ createdAt: -1 })
-        .limit(50)
+        .skip(skip)
+        .limit(limit)
         .toArray();
 
       return res.status(200).json({
         success: true,
         sessions,
+        pagination: {
+          page,
+          limit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasNextPage: page < Math.ceil(totalCount / limit),
+          hasPrevPage: page > 1,
+        },
       });
     }
 

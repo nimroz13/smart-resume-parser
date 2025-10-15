@@ -3,6 +3,7 @@ import { analyzeResumes } from './services/geminiService';
 import { parseFile } from './services/fileParsers';
 import type { Candidate, Resume, HistoryEntry } from './types';
 import { useHistory } from './hooks/useHistory';
+import { useMongoHistory } from './hooks/useMongoHistory';
 
 import Header from './components/Header';
 import JobDescriptionInput from './components/JobDescriptionInput';
@@ -13,6 +14,7 @@ import Placeholder from './components/Placeholder';
 import ErrorDisplay from './components/ErrorDisplay';
 import ResumeScoreTable from './components/ResumeScoreTable';
 import HistorySidebar from './components/HistorySidebar';
+import MongoHistorySidebar from './components/MongoHistorySidebar';
 import { saveSearchSessionToMongo } from './services/mongoClient';
 
 type PageView = 'upload' | 'analysis' | 'history';
@@ -35,6 +37,21 @@ const App: React.FC = () => {
   const [currentAnalysisJDFileName, setCurrentAnalysisJDFileName] = useState<string | null>(null);
   const [currentAnalysisJDPresetName, setCurrentAnalysisJDPresetName] = useState<string | null>(null);
 
+  // Use MongoDB history instead of localStorage
+  const {
+    history: mongoHistory,
+    isLoading: historyLoading,
+    error: historyError,
+    pagination,
+    removeHistoryEntry: removeMongoHistoryEntry,
+    clearHistory: clearMongoHistory,
+    nextPage,
+    prevPage,
+    goToPage,
+    refresh: refreshHistory,
+  } = useMongoHistory();
+
+  // Keep localStorage as backup
   const { history, addHistoryEntry, removeHistoryEntry, clearHistory } = useHistory();
 
   const handleAddResume = (text: string) => {
@@ -150,6 +167,8 @@ const App: React.FC = () => {
           analysisResults: results,
         });
         console.log('Session saved to MongoDB successfully');
+        // Refresh MongoDB history to show the new session
+        refreshHistory();
       } catch (mongoError) {
         console.error('Failed to save to MongoDB, but localStorage saved:', mongoError);
         // Don't show error to user - localStorage backup is sufficient
@@ -370,13 +389,18 @@ const App: React.FC = () => {
               <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-2">
                 Step 3: History
               </h2>
-              <p className="text-gray-600">Access your previous screening sessions</p>
+              <p className="text-gray-600">Access your previous screening sessions from MongoDB</p>
             </div>
-            <HistorySidebar
-              history={history}
+            <MongoHistorySidebar
+              history={mongoHistory}
+              isLoading={historyLoading}
+              error={historyError}
+              pagination={pagination}
               onLoadEntry={handleLoadHistoryEntry}
-              onDeleteEntry={removeHistoryEntry}
-              onClearHistory={clearHistory}
+              onDeleteEntry={removeMongoHistoryEntry}
+              onNextPage={nextPage}
+              onPrevPage={prevPage}
+              onGoToPage={goToPage}
               currentJobDescription={jobDescription}
             />
           </div>
