@@ -1,0 +1,5 @@
+{
+  "name": "Smart Resume Screener",
+  "description": "An intelligent tool to parse resumes, extract key information, and score candidates against a job description using the Gemini API.",
+  "requestFramePermissions": []
+}
