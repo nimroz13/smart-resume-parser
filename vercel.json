@@ -1,7 +1,8 @@
 {
-    "functions": {
-        "api/**/*.ts": {
-            "runtime": "@vercel/node@3"
-        }
+  "functions": {
+    "api/mongodb.ts": {
+      "memory": 1024,
+      "maxDuration": 10
     }
+  }
 }
