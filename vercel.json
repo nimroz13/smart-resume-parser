@@ -1,8 +1,8 @@
 {
-  "functions": {
-    "api/mongodb.ts": {
-      "memory": 1024,
-      "maxDuration": 10
+    "functions": {
+        "api/mongodb.ts": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
     }
-  }
 }
