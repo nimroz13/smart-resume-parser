@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { analyzeResumes } from './services/geminiService';
 import { parseFile } from './services/fileParsers';
 import type { Candidate, Resume, HistoryEntry } from './types';
-import { useHistory } from './hooks/useHistory';
 import { useMongoHistory } from './hooks/useMongoHistory';
 
 import Header from './components/Header';
@@ -13,7 +12,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 import Placeholder from './components/Placeholder';
 import ErrorDisplay from './components/ErrorDisplay';
 import ResumeScoreTable from './components/ResumeScoreTable';
-import HistorySidebar from './components/HistorySidebar';
 import MongoHistorySidebar from './components/MongoHistorySidebar';
 import { saveSearchSessionToMongo } from './services/mongoClient';
 
@@ -51,8 +49,7 @@ const App: React.FC = () => {
     refresh: refreshHistory,
   } = useMongoHistory();
 
-  // Keep localStorage as backup
-  const { history, addHistoryEntry, removeHistoryEntry, clearHistory } = useHistory();
+
 
   const handleAddResume = (text: string) => {
     if (text.trim()) {
@@ -153,9 +150,6 @@ const App: React.FC = () => {
       setCurrentAnalysisResumes(resumes);
       setCurrentAnalysisJDFileName(jdFileName);
       setCurrentAnalysisJDPresetName(jdPresetName);
-
-      // Save to history on success (localStorage)
-      addHistoryEntry({ jobDescription, jdFileName, jdPresetName, resumes, analysisResults: results });
 
       // Save to MongoDB (in background, don't block UI)
       try {
