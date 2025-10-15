@@ -3,6 +3,9 @@
         "api/mongodb.ts": {
             "memory": 1024,
             "maxDuration": 10
+        },
+        "api/proxy.ts": {
+            "maxDuration": 30
         }
     }
 }
