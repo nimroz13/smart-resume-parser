@@ -13,6 +13,7 @@ import Placeholder from './components/Placeholder';
 import ErrorDisplay from './components/ErrorDisplay';
 import ResumeScoreTable from './components/ResumeScoreTable';
 import HistorySidebar from './components/HistorySidebar';
+import { saveSearchSessionToMongo } from './services/mongoClient';
 
 type PageView = 'upload' | 'analysis' | 'history';
 const App: React.FC = () => {
@@ -136,8 +137,23 @@ const App: React.FC = () => {
       setCurrentAnalysisJDFileName(jdFileName);
       setCurrentAnalysisJDPresetName(jdPresetName);
 
-      // Save to history on success
+      // Save to history on success (localStorage)
       addHistoryEntry({ jobDescription, jdFileName, jdPresetName, resumes, analysisResults: results });
+
+      // Save to MongoDB (in background, don't block UI)
+      try {
+        await saveSearchSessionToMongo({
+          jobDescription,
+          jdFileName,
+          jdPresetName,
+          resumes,
+          analysisResults: results,
+        });
+        console.log('Session saved to MongoDB successfully');
+      } catch (mongoError) {
+        console.error('Failed to save to MongoDB, but localStorage saved:', mongoError);
+        // Don't show error to user - localStorage backup is sufficient
+      }
 
       // Reset job description and resumes after successful analysis
       setJobDescription('');

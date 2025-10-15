@@ -9,10 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
     "@google/genai": "^1.24.0",
+    "mongodb": "^6.20.0",
+    "pdfjs-dist": "4.4.168",
     "react": "^19.2.0",
-    "pdfjs-dist": "4.4.168"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
