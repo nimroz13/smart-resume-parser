@@ -1,4 +1,5 @@
 import { MongoClient, Db, ObjectId } from "mongodb";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const MONGODB_URI = process.env.MONGODB_URI || "";
 const DB_NAME = "resume_screener";
@@ -21,30 +22,23 @@ async function connectToDatabase() {
   return { client, db };
 }
 
-export const config = {
-  runtime: "edge",
-};
-
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-    });
+    return res.status(200).end();
   }
 
   try {
     const { db } = await connectToDatabase();
-    const { searchParams } = new URL(req.url);
-    const action = searchParams.get("action");
+    const action = req.query.action as string;
 
     // Save search session
     if (action === "saveSession" && req.method === "POST") {
-      const body = await req.json();
+      const body = req.body;
 
       const resumeCollection = db.collection("resumes");
       const sessionCollection = db.collection("search_sessions");
@@ -100,18 +94,10 @@ export default async function handler(req: Request) {
         { $set: { searchId: sessionResult.insertedId } }
       );
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          sessionId: sessionResult.insertedId.toString(),
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
+      return res.status(200).json({
+        success: true,
+        sessionId: sessionResult.insertedId.toString(),
+      });
     }
 
     // Get all sessions
@@ -123,23 +109,15 @@ export default async function handler(req: Request) {
         .limit(50)
         .toArray();
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          sessions,
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
+      return res.status(200).json({
+        success: true,
+        sessions,
+      });
     }
 
     // Get session by ID
     if (action === "getSession" && req.method === "GET") {
-      const sessionId = searchParams.get("sessionId");
+      const sessionId = req.query.sessionId as string;
       const sessionCollection = db.collection("search_sessions");
       const resumeCollection = db.collection("resumes");
 
@@ -148,19 +126,10 @@ export default async function handler(req: Request) {
       });
 
       if (!session) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Session not found",
-          }),
-          {
-            status: 404,
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          }
-        );
+        return res.status(404).json({
+          success: false,
+          error: "Session not found",
+        });
       }
 
       // Get resumes
@@ -169,24 +138,16 @@ export default async function handler(req: Request) {
         .find({ _id: { $in: resumeIds } })
         .toArray();
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          session,
-          resumes,
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
+      return res.status(200).json({
+        success: true,
+        session,
+        resumes,
+      });
     }
 
     // Delete session
     if (action === "deleteSession" && req.method === "DELETE") {
-      const sessionId = searchParams.get("sessionId");
+      const sessionId = req.query.sessionId as string;
       const sessionCollection = db.collection("search_sessions");
       const resumeCollection = db.collection("resumes");
 
@@ -202,17 +163,12 @@ export default async function handler(req: Request) {
         });
       }
 
-      return new Response(JSON.stringify({ success: true }), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
+      return res.status(200).json({ success: true });
     }
 
     // Get statistics
     if (action === "getStats" && req.method === "GET") {
-      const sessionId = searchParams.get("sessionId");
+      const sessionId = req.query.sessionId as string;
       const collection = db.collection("search_sessions");
 
       const session = await collection.findOne({
@@ -220,19 +176,10 @@ export default async function handler(req: Request) {
       });
 
       if (!session) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Session not found",
-          }),
-          {
-            status: 404,
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          }
-        );
+        return res.status(404).json({
+          success: false,
+          error: "Session not found",
+        });
       }
 
       const acceptedCount = session.analyzedResumes.filter(
@@ -259,53 +206,27 @@ export default async function handler(req: Request) {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          stats: {
-            totalResumes: session.totalResumes,
-            acceptedCount,
-            rejectedCount,
-            averageScore,
-            topSkills,
-          },
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
+      return res.status(200).json({
+        success: true,
+        stats: {
+          totalResumes: session.totalResumes,
+          acceptedCount,
+          rejectedCount,
+          averageScore,
+          topSkills,
+        },
+      });
     }
 
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: "Invalid action",
-      }),
-      {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    return res.status(400).json({
+      success: false,
+      error: "Invalid action",
+    });
   } catch (error: any) {
     console.error("MongoDB API error:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 }
