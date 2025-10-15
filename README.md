@@ -1,10 +1,22 @@
-# Smart Resume Parser
+# Smart Resume Screener
 
 An AI-powered resume screening application for streamlined recruitment with intelligent candidate analysis, persistent data storage, and a modern UI. Built with React, TypeScript, MongoDB, and powered by Google Gemini AI.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://smart-resume-parser-five.vercel.app/)
+
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-2.0%20Flash-blue?style=for-the-badge&logo=google)](https://ai.google.dev/)
+
+> **Note:** The domain name was changed during deployment, but both URLs remain accessible:
+> - Original: [smart-resume-parser-five.vercel.app](https://smart-resume-parser-five.vercel.app/)
+> - Current: [nimroz13-smart-resume-screener.vercel.app](https://nimroz13-smart-resume-screener.vercel.app/)
+
+---
+
+## Video Demonstration
+
+Watch the full application demo on Google Drive:
+
+**[📹 View Video Demonstration](https://drive.google.com/file/d/1LeSyKQVWKku1W9VVDrcLZTLDiHx7yu86/view?usp=drive_link )**
 
 ---
 
@@ -238,8 +250,8 @@ Save to MongoDB for history
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/nimroz13/smart-resume-parser.git
-cd smart-resume-parser
+git clone https://github.com/nimroz13/smart-resume-screener.git
+cd smart-resume-screener
 ```
 
 2. **Install dependencies**
@@ -303,7 +315,6 @@ The app will be available at `http://localhost:3100`
    | `API_KEY`             | Your Gemini API Key            | For serverless function |
    | `VITE_GEMINI_API_KEY` | Your Gemini API Key            | For frontend            |
    | `MONGODB_URI`         | Your MongoDB connection string | Include database name   |
-
 
    **Important:**
 
@@ -383,7 +394,7 @@ The `vercel.json` file configures serverless functions:
 ## Project Structure
 
 ```
-smart-resume-parser/
+smart-resume-screener/
 ├── api/
 │   ├── mongodb.ts                  # MongoDB serverless API
 │   └── proxy.ts                    # Gemini API proxy
@@ -612,7 +623,7 @@ smart-resume-parser/
 **Naushaba Imroz**
 
 - GitHub: [@nimroz13](https://github.com/nimroz13)
-- Project: [Smart Resume Parser](https://smart-resume-parser-five.vercel.app/)
+- Project: [Smart Resume Screener](https://nimroz13-smart-resume-screener.vercel.app/)
 
 ---
 
@@ -626,13 +637,6 @@ smart-resume-parser/
 
 ---
 
-## Additional Documentation
-
-- **[MONGODB_SETUP.md](MONGODB_SETUP.md)** - Detailed MongoDB setup guide
-- **[MONGODB_HISTORY_PAGINATION.md](MONGODB_HISTORY_PAGINATION.md)** - Pagination implementation details
-- **[vercel.json](vercel.json)** - Serverless function configuration
-
----
 
 If you find this project helpful, please consider giving it a star on GitHub!
 
